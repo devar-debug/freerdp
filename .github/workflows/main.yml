@@ -1,4 +1,4 @@
-name: Free Windows RDP with Tailscale
+name: Windows 11 RDP with Tailscale
 
 on:
   workflow_dispatch:
@@ -10,27 +10,30 @@ jobs:
     steps:
     - name: Download & Install Tailscale
       run: |
-        invoke-webrequest https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -outfile tailscale-setup.exe
-        start-process tailscale-setup.exe -argumentlist '/quiet' -wait
+        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale-setup.exe"
+        Start-Process -FilePath ".\tailscale-setup.exe" -ArgumentList "/quiet" -Wait
 
-    - name: Connect to Tailscale
+    - name: Authenticate Tailscale
+      env:
+        TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
       run: |
-        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --accept-routes
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=$env:TAILSCALE_AUTH_KEY --accept-routes
 
-    - name: Enable Remote Desktop
+    - name: Configure User & Enable RDP
       run: |
+        $Password = ConvertTo-SecureString "987654321" -AsPlainText -Force
+        New-LocalUser "Pipilika" -Password $Password -FullName "Pipilika Host IT" -Description "RDP Admin User"
+        Add-LocalGroupMember -Group "Administrators" -Member "Pipilika"
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
 
-    - name: Create RDP User
+    - name: Keep RDP Alive (6 Hours)
       run: |
-        net user RDPAdmin Pa$$w0rd1234 /add
-        net localgroup administrators RDPAdmin /add
-
-    - name: Keep RDP Alive (Up to 6 Hours)
-      run: |
-        $Loop = $true
-        while ($Loop) {
-            Start-Sleep -Seconds 60
+        $timeout = 21600 # 6 hours in seconds
+        $interval = 30
+        $elapsed = 0
+        while ($elapsed -lt $timeout) {
+            Start-Sleep -Seconds $interval
+            $elapsed += $interval
+            Write-Host "RDP Active: $elapsed seconds elapsed..."
         }
