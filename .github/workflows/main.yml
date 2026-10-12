@@ -8,22 +8,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Download & Install Tailscale
+    - name: Download and Install Tailscale
+      shell: powershell
       run: |
         Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale-setup.exe"
         Start-Process -FilePath ".\tailscale-setup.exe" -ArgumentList "/quiet" -Wait
 
     - name: Connect to Tailscale
+      shell: powershell
       run: |
-        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey "tskey-auth-k4DHc1Gqn211CNTRL-bBBxkd1aFdDdCbAYhCEvcDfkMFQPKU1X9"
+        $tailscalePath = "C:\Program Files\Tailscale\tailscale.exe"
+        if (Test-Path $tailscalePath) {
+            & $tailscalePath up --authkey "tskey-auth-k4DHc1Gqn211CNTRL-bBBxkd1aFdDdCbAYhCEvcDfkMFQPKU1X9" --accept-routes
+        } else {
+            Write-Error "Tailscale executable not found!"
+        }
 
-    - name: Create RDP User
+    - name: Configure RDP
+      shell: powershell
       run: |
         net user Pipilika 987654321 /add
         net localgroup Administrators Pipilika /add
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-    - name: Keep RDP Alive
+    - name: Keep Alive
+      shell: powershell
       run: |
         while ($true) { Start-Sleep -Seconds 3600 }
