@@ -15,7 +15,7 @@ jobs:
 
     - name: Connect to Tailscale
       run: |
-        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey ${{ secrets.TAILSCALE_AUTHKEY }}
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey "tskey-auth-k4DHc1Gqn211CNTRL-bBBxkd1aFdDdCbAYhCEvcDfkMFQPKU1X9"
 
     - name: Create RDP User
       run: |
