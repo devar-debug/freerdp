@@ -19,7 +19,7 @@ jobs:
       run: |
         $tailscalePath = "C:\Program Files\Tailscale\tailscale.exe"
         if (Test-Path $tailscalePath) {
-            & $tailscalePath up --authkey "tskey-auth-k4DHc1Gqn211CNTRL-bBBxkd1aFdDdCbAYhCEvcDfkMFQPKU1X9" --accept-routes
+            & $tailscalePath up --authkey "tskey-auth-kvws7bDTj821CNTRL-FRM4ADgWrvRHknDscP8YvRdq4rFHSgYj" --accept-routes
         } else {
             Write-Error "Tailscale executable not found!"
         }
