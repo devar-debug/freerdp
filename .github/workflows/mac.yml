@@ -1,0 +1,33 @@
+name: macOS Remote Environment Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Tmate Remote Session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: falsename: macOS Remote Environment Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Tmate Remote Session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: false
