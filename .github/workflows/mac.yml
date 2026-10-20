@@ -1,12 +1,21 @@
-name: macOS Chrome Remote Desktop
+name: Multi-OS Remote Environment
 
 on:
   workflow_dispatch:
+    inputs:
+      os_choice:
+        description: 'কোন সিস্টেম চালু করতে চান নির্বাচন করুন:'
+        required: true
+        default: 'macOS'
+        type: choice
+        options:
+          - 'macOS'
+          - 'Windows'
 
 jobs:
-  build:
+  run-mac:
+    if: ${{ github.event.inputs.os_choice == 'macOS' }}
     runs-on: macos-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -27,3 +36,17 @@ jobs:
       - name: Keep Alive Session
         run: |
           sleep 21600
+
+  run-windows:
+    if: ${{ github.event.inputs.os_choice == 'Windows' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Start Windows Setup
+        env:
+          TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+        run: |
+          echo "Starting Windows RDP workflow..."
+          # এখানে আপনার আগের উইন্ডোজের স্ক্রিপ্ট/কমান্ড থাকবে
