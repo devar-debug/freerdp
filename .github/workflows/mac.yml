@@ -1,4 +1,4 @@
-name: macOS Web Terminal Setup
+name: macOS Chrome Remote Desktop
 
 on:
   workflow_dispatch:
@@ -11,7 +11,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup tmate Session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: false
+      - name: Install Chrome Remote Desktop
+        run: |
+          curl -LH "AAL:1" https://dl.google.com/chrome-remote-desktop/chrome-remote-desktop.dmg -o crd.dmg
+          hdiutil attach crd.dmg
+          sudo installer -pkg /Volumes/Chrome\ Remote\ Desktop/Chrome\ Remote\ Desktop.pkg -target /
+          hdiutil detach /Volumes/Chrome\ Remote\ Desktop
+
+      - name: Setup Remote Access Command
+        env:
+          CRD_COMMAND: ${{ secrets.CRD_COMMAND }}
+        run: |
+          eval "$CRD_COMMAND"
+
+      - name: Keep Alive Session
+        run: |
+          sleep 21600
