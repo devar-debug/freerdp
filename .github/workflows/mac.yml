@@ -1,4 +1,4 @@
-name: macOS Tailscale Remote Setup
+name: macOS Web Terminal Setup
 
 on:
   workflow_dispatch:
@@ -8,30 +8,10 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Install and Start Tailscale
-      run: |
-        brew install tailscale
-        sudo tailscaled --state=/var/lib/tailscale/tailscaled.state &
-        sleep 10
-
-    - name: Connect to Tailscale
-      env:
-        TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTHKEY }}
-      run: |
-        sudo tailscale up --authkey=$TAILSCALE_AUTH_KEY --hostname=github-macos-runner
-
-    - name: Enable Screen Sharing (VNC / RDP Access)
-      run: |
-        sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
-          -activate -configure -access -on \
-          -clientopts -setvnclegacy -yes \
-          -clientopts -setvncpw -vncpw "123456" \
-          -restart -agent -privs -all
-
-    - name: Keep Alive Session (6 Hours)
-      run: |
-        echo "macOS Session is ready!"
-        sleep 21600
+      - name: Setup tmate Session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: false
