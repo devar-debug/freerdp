@@ -9,8 +9,8 @@ on:
         default: 'macOS'
         type: choice
         options:
-          - 'macOS'
-          - 'Windows'
+          - macOS
+          - Windows
 
 jobs:
   run-mac:
@@ -22,31 +22,13 @@ jobs:
 
       - name: Install Chrome Remote Desktop
         run: |
-          curl -LH "AAL:1" https://dl.google.com/chrome-remote-desktop/chrome-remote-desktop.dmg -o crd.dmg
-          hdiutil attach crd.dmg
-          sudo installer -pkg /Volumes/Chrome\ Remote\ Desktop/Chrome\ Remote\ Desktop.pkg -target /
-          hdiutil detach /Volumes/Chrome\ Remote\ Desktop
+          brew install --cask chrome-remote-desktop-host
 
       - name: Setup Remote Access Command
-        env:
-          CRD_COMMAND: ${{ secrets.CRD_COMMAND }}
         run: |
-          eval "$CRD_COMMAND"
+          ${{ secrets.CRD_COMMAND }}
 
       - name: Keep Alive Session
         run: |
+          echo "macOS environment running..."
           sleep 21600
-
-  run-windows:
-    if: ${{ github.event.inputs.os_choice == 'Windows' }}
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Start Windows Setup
-        env:
-          TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
-        run: |
-          echo "Starting Windows RDP workflow..."
-          # এখানে আপনার আগের উইন্ডোজের স্ক্রিপ্ট/কমান্ড থাকবে
