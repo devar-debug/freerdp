@@ -24,9 +24,21 @@ jobs:
         run: |
           brew install --cask chrome-remote-desktop-host
 
-      - name: Setup Remote Access Command
+      - name: Setup Remote Access
         run: |
-          ${{ secrets.CRD_COMMAND }}
+          # CRD_COMMAND থেকে শুধু কোড সংগ্রহ
+          CMD="${{ secrets.CRD_COMMAND }}"
+          CODE=$(echo "$CMD" | grep -oE '\-\-code="[^"]+"' | cut -d'"' -f2)
+          REDIRECT=$(echo "$CMD" | grep -oE '\-\-redirect\-url="[^"]+"' | cut -d'"' -f2)
+          NAME=$(echo "$CMD" | grep -oE '\-\-name=[^ ]+' | cut -d'=' -f2)
+
+          if [ -z "$CODE" ]; then
+            # যদি সরাসরি সম্পূর্ণ কমান্ড থাকে তবে রান করার চেষ্টা
+            eval "$CMD"
+          else
+            # macOS-এর জন্য সঠিক পাথে সার্ভিস চালু
+            /Library/PrivilegedHelperTools/chrome-remote-desktop-host --code="$CODE" --redirect-url="$REDIRECT" --name="$NAME"
+          fi
 
       - name: Keep Alive Session
         run: |
